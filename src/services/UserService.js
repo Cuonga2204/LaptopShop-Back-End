@@ -61,20 +61,21 @@ const loginUser = (loginUser) => {
         })
       }
       const access_token = await genneralAccessToken({
+
         id: checkUser.id,
         isAdmin: checkUser.isAdmin
       })
-      const refresh_token = await genneralRefreshToken({
-        id: checkUser.id,
-        isAdmin: checkUser.isAdmin
-      })
+      // const refresh_token = await genneralRefreshToken({
+      //   id: checkUser.id,
+      //   isAdmin: checkUser.isAdmin
+      // })
       console.log('accessToken:', access_token);
 
       resolve({
         status: 'OK',
         message: 'LOGIN SUCCESS',
         access_token: access_token,
-        refresh_token: refresh_token
+        // refresh_token: refresh_token
       })
 
     } catch (error) {

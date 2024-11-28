@@ -46,6 +46,10 @@ const addToCart = (userId, productId, quantity) => {
                 cart.items.push({
                     product: productId,
                     nameProduct: product.name,
+                    imageProduct: product.imageUrl,
+                    productConfig: product.config,
+                    description: product.description,
+                    currentPrice: product.currentPrice,
                     quantity,
                     price: product.currentPrice * quantity,
                 });
@@ -102,7 +106,7 @@ const deleteFromCart = (userId, productId) => {
                 return;
             }
             cart.items = cart.items.filter((item) => item.product.toString() !== productId);
-            cart.totalPrice = cart.items.reduce((acc, item) => acc + item.price, 0);
+            cart.totalPrice = cart.items.reduce((acc, item) => acc + item.price * item.quantity, 0);
             await cart.save();
 
             resolve({
@@ -139,7 +143,7 @@ const updateQuantity = (userId, productId, quantity) => {
 
             cartItem.quantity = quantity;
             cartItem.price = cartItem.price;
-            cart.totalPrice = cart.items.reduce((acc, item) => acc + item.price, 0);
+            cart.totalPrice = cart.items.reduce((acc, item) => acc + item.price * item.quantity, 0);
             await cart.save();
 
             resolve({
@@ -152,10 +156,44 @@ const updateQuantity = (userId, productId, quantity) => {
         }
     });
 };
+const clearCart = (userId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            // Tìm giỏ hàng dựa trên userId
+            const cart = await Cart.findOne({ userId: userId });
+            if (!cart) {
+                resolve({
+                    status: "ERR",
+                    message: "Cart not found",
+                });
+                return;
+            }
+
+            // Xóa toàn bộ sản phẩm trong giỏ hàng
+            cart.items = [];
+            cart.totalPrice = 0;
+
+            // Lưu lại giỏ hàng
+            await cart.save();
+
+            resolve({
+                status: "OK",
+                message: "Cart cleared successfully",
+                data: cart,
+            });
+        } catch (error) {
+            reject({
+                status: "ERR",
+                message: error.message,
+            });
+        }
+    });
+};
 
 module.exports = {
     addToCart,
     getCart,
     deleteFromCart,
     updateQuantity,
+    clearCart,
 };

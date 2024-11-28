@@ -3,7 +3,10 @@ const dotenv = require('dotenv');
 dotenv.config();
 const authUserMiddleware = (req, res, next) => {
     const token = req.headers.authorization.split(" ")[1];
-    const userId = req.params.id;
+
+    const userId = req.body.userId || req.query.userId;
+    console.log(userId);
+
     jwt.verify(token, process.env.ACCESS_TOKEN, function (err, user) {
         if (err) {
             return res.status(404).json({
@@ -14,13 +17,13 @@ const authUserMiddleware = (req, res, next) => {
         console.log(user);
 
         const { payload } = user;
-        if (payload.isAdmin || payload.id === userId) {
+        if (payload.id === userId) {
             next();
 
         } else {
             return res.status(404).json({
                 status: 'ERR',
-                message: 'Not Admin'
+                message: 'Not User'
             })
         }
     });
