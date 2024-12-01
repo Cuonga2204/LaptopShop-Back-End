@@ -6,6 +6,8 @@ const addToCart = (userId, productId, quantity) => {
     return new Promise(async (resolve, reject) => {
         try {
             const product = await Product.findById(productId);
+            console.log(product);
+
             if (!product) {
                 resolve({
                     status: 'ERR',

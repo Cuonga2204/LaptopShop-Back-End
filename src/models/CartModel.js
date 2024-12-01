@@ -9,7 +9,7 @@ const cartSchema = new mongoose.Schema({
     },
     userName: {
         type: mongoose.Schema.Types.String,
-        required: true,
+
     },
     items: [cartItemSchema], // Mảng các sản phẩm trong giỏ hàng
     totalPrice: {

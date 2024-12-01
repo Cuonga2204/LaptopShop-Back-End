@@ -30,14 +30,19 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
     try {
         const productId = req.params.id;
+        const imageUrl = req.file ? `/uploads/images/${req.file.filename}` : null; // Kiểm tra nếu có file ảnh
+        // console.log(req.body);
+
         const data = req.body;
+        // console.log(data);
+
         if (!productId) {
             return res.status(200).json({
                 status: 'ERR',
                 message: 'productId  is required'
             })
         }
-        const response = await ProductService.updateProduct(productId, data)
+        const response = await ProductService.updateProduct(productId, data, imageUrl)
 
         return res.status(200).json(response)
     } catch (error) {
@@ -56,7 +61,7 @@ const deleteProduct = async (req, res) => {
                 message: 'productId is required'
             })
         }
-        const response = await ProductService.deleteProduct(productId)
+        const response = await ProductService.deleteProduct(productId);
 
         return res.status(200).json(response)
     } catch (error) {
@@ -94,10 +99,21 @@ const getAllProduct = async (req, res) => {
         })
     }
 }
+const getAllProductHomePage = async (req, res) => {
+    try {
+        const response = await ProductService.getAllProductHomePage();
+        return res.status(200).json(response)
+    } catch (error) {
+        return res.status(404).json({
+            message: error
+        })
+    }
+}
 module.exports = {
     createProduct,
     updateProduct,
     deleteProduct,
     getAllProduct,
     getDetailsProduct,
+    getAllProductHomePage,
 }

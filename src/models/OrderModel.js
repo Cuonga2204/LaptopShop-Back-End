@@ -30,6 +30,9 @@ const orderSchema = new mongoose.Schema({
         ref: "User", // Liên kết với người dùng
         required: true,
     },
+    userName: {
+        type: String,
+    },
     items: [orderItemSchema], // Các sản phẩm trong đơn hàng
     totalPrice: {
         type: Number,
@@ -38,12 +41,13 @@ const orderSchema = new mongoose.Schema({
     shippingInfo: {
         name: { type: String, required: true },
         phone: { type: String, required: true },
+        email: { type: String },
         address: { type: String, required: true },
     },
     status: {
         type: String,
-        enum: ["Pending", "Processing", "Shipped"],
-        default: "Pending",
+        enum: ["Chờ xác nhận", "Chờ giao hàng", "Hoàn thành"],
+        default: "Chờ xác nhận",
     },
     createdAt: {
         type: Date,

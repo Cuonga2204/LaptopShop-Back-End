@@ -4,8 +4,17 @@ const JwtService = require('../services/JwtService')
 const createUser = async (req, res) => {
     try {
         const { email, password, confirmPassword } = req.body;
+        const imageUrl = req.file ? `/uploads/images/${req.file.filename}` : null;
+        console.log(req.body);
+
+        console.log(email);
+        console.log(password);
+        console.log(confirmPassword);
+        console.log(imageUrl);
+
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const isCheckEmail = emailRegex.test(email);
+
 
         if (!email || !password || !confirmPassword) {
             return res.status(200).json({
@@ -24,7 +33,7 @@ const createUser = async (req, res) => {
                 message: 'The password in equal'
             })
         }
-        const response = await UserService.createUser(req.body)
+        const response = await UserService.createUser(req.body, imageUrl)
 
 
         return res.status(200).json(response)
@@ -66,13 +75,16 @@ const updateUser = async (req, res) => {
     try {
         const userId = req.params.id;
         const data = req.body;
+        const imageUrl = req.file ? `/uploads/images/${req.file.filename}` : null;
+        console.log(imageUrl);
+
         if (!userId) {
             return res.status(200).json({
                 status: 'ERR',
                 message: 'userId is required'
             })
         }
-        const response = await UserService.updateUser(userId, data)
+        const response = await UserService.updateUser(userId, data, imageUrl)
 
         return res.status(200).json(response)
     } catch (error) {

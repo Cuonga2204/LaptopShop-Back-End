@@ -1,12 +1,16 @@
 const Order = require('../models/OrderModel');
 const Cart = require('../models/CartModel');
-// const User = require('../models/UserModel');
+const User = require('../models/UserModel');
 const mongoose = require("mongoose");
 const createOrder = (userId, shippingInfo) => {
     return new Promise(async (resolve, reject) => {
         try {
+
             // Lấy giỏ hàng của người dùng
             const cart = await Cart.findOne({ userId: userId });
+            const user = await User.findById(userId);
+            console.log(user.email);
+
             if (!cart || cart.items.length === 0) {
                 resolve({
                     status: "ERR",
@@ -18,6 +22,7 @@ const createOrder = (userId, shippingInfo) => {
             // Tạo đơn hàng từ giỏ hàng
             const order = new Order({
                 userId: userId,
+                userName: cart.userName,
                 items: cart.items.map(item => ({
                     productId: item.product,
                     nameProduct: item.nameProduct,
@@ -26,7 +31,7 @@ const createOrder = (userId, shippingInfo) => {
                     price: item.price,
                 })),
                 totalPrice: cart.totalPrice,
-                shippingInfo: shippingInfo,
+                shippingInfo: { ...shippingInfo, email: user.email },
             });
 
             // Lưu đơn hàng
@@ -62,11 +67,32 @@ const getUserOrders = (userId) => {
             // const objectId = new mongoose.Types.ObjectId(userId);
 
             // Truy vấn danh sách đơn hàng theo userId
-            console.log(typeof (objectId));
+
 
             const orders = await Order.find({ userId: userId }).sort({ createdAt: -1 });
+            // const user = await User.findOne({userId: userId})
             console.log(orders);
 
+            resolve({
+                status: 'OK',
+                message: 'Orders retrieved successfully',
+                data: orders,
+            });
+        } catch (error) {
+            reject({
+                status: 'ERR',
+                message: error.message,
+            });
+        }
+    });
+};
+const getAllOrders = () => {
+
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            const orders = await Order.find().sort({ createdAt: -1 });
+            console.log(orders);
             resolve({
                 status: 'OK',
                 message: 'Orders retrieved successfully',
@@ -135,5 +161,6 @@ module.exports = {
     createOrder,
     getUserOrders,
     deleteOrder,
+    getAllOrders,
     getOrderDetail,
 } 

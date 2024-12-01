@@ -2,7 +2,7 @@ const User = require('../models/UserModel')
 require('dotenv').config();
 const bcrypt = require('bcrypt');
 const { genneralAccessToken, genneralRefreshToken } = require('./JwtService');
-const createUser = (newUser) => {
+const createUser = (newUser, imageUrl) => {
   return new Promise(async (resolve, reject) => {
     const { name, email, password, confirmPassword, phone } = newUser
     try {
@@ -21,7 +21,8 @@ const createUser = (newUser) => {
         name,
         email,
         password: hash,
-        phone
+        phone,
+        imageUrl
       })
       if (createUser) {
         resolve({
@@ -83,7 +84,7 @@ const loginUser = (loginUser) => {
     }
   })
 }
-const updateUser = (userId, data) => {
+const updateUser = (userId, data, imageUrl) => {
   return new Promise(async (resolve, reject) => {
 
     try {
@@ -95,6 +96,19 @@ const updateUser = (userId, data) => {
           status: 'OK',
           message: 'userId is required',
         })
+      }
+      if (imageUrl) {
+        data.imageUrl = imageUrl;
+
+        // Xóa ảnh cũ nếu có
+        if (checkUser.imageUrl && checkUser.imageUrl !== '/uploads/images/avatarDefault.png') {
+          const fs = require('fs');
+          const path = require('path');
+          const oldImagePath = path.join(__dirname, `../..${checkUser.imageUrl}`);
+          fs.unlink(oldImagePath, (err) => {
+            if (err) console.error("Failed to delete old image:", err.message);
+          });
+        }
       }
       const updatedUser = await User.findByIdAndUpdate(userId, data);
       console.log(updatedUser);
