@@ -16,21 +16,22 @@ app.use(cors());
 app.use(bodyParser.json());
 
 routes(app)
-mongoose.connect('mongodb://localhost:27017/laptop-store-project')
-    .then(() => {
-        console.log('Connect DB success!');
-    })
-    .catch((err) => {
-        console.log(err);
+// mongoose.connect('mongodb://localhost:27017/laptop-store-project')
+//     .then(() => {
+//         console.log('Connect DB success!');
+//     })
+//     .catch((err) => {
+//         console.log(err);
 
-    })
+//     })
 
 // const queryString = "mongodb+srv://dobalam:dobalam-it4409@lamdb-it4409.ybiwz.mongodb.net/College?retryWrites=true&w=majority&appName=lamdb-it4409";
-// const queryString = "mongodb+srv://cuonga2242002:123@cluster0.wwswi.mongodb.net/laptop-store-project?retryWrites=true&w=majority&appName=cluster0";
+// const queryString = "mongodb+srv://cuonga:1234@cluster0.wwswi.mongodb.net/demo_projectweb?retryWrites=true&w=majority&appName=cluster0";
+const queryString = "mongodb+srv://thanhdat2003pt:123@cluster0.nccer.mongodb.net/?retryWrites=true&w=majority&appName=cluster0";
 
-// mongoose.connect(queryString, {
-// }).then(() => console.log('MongoDB connected!'))
-//     .catch(err => console.log('MongoDB connection error:', err.message));
+mongoose.connect(queryString, {
+}).then(() => console.log('MongoDB connected!'))
+    .catch(err => console.log('MongoDB connection error:', err.message));
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)

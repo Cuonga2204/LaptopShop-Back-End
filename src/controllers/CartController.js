@@ -55,6 +55,8 @@ const updateQuantity = async (req, res) => {
         // const userId = req.headers['userid']; // Lấy userId từ header
         const { quantity, userId } = req.body;
         const productId = req.params.productId;
+        console.log(quantity, userId, productId);
+
 
         if (!userId || !productId || !quantity) {
             return res.status(400).json({ message: 'userId, productId, and quantity are required' });
