@@ -27,7 +27,7 @@ routes(app)
 
 // const queryString = "mongodb+srv://dobalam:dobalam-it4409@lamdb-it4409.ybiwz.mongodb.net/College?retryWrites=true&w=majority&appName=lamdb-it4409";
 // const queryString = "mongodb+srv://cuonga:1234@cluster0.wwswi.mongodb.net/demo_projectweb?retryWrites=true&w=majority&appName=cluster0";
-const queryString = "mongodb+srv://thanhdat2003pt:123@cluster0.nccer.mongodb.net/?retryWrites=true&w=majority&appName=cluster0";
+const queryString = "mongodb+srv://cuonga:123@cluster0.wwswi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 mongoose.connect(queryString, {
 }).then(() => console.log('MongoDB connected!'))
