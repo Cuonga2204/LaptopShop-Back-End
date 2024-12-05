@@ -106,6 +106,29 @@ const getAllOrders = () => {
         }
     });
 };
+const getAllOrderPage = (limit = 5, page = 1) => {
+
+    return new Promise(async (resolve, reject) => {
+        try {
+            const totalOrder = await Order.countDocuments();
+            const allOrder = await Order.find().limit(limit).skip(limit * (page - 1));
+            // const orders = await Order.find().sort({ createdAt: -1 });
+            resolve({
+                status: 'OK',
+                message: 'Orders retrieved successfully',
+                data: allOrder,
+                pageCurrent: page,
+                totalPages: Math.ceil(totalOrder / limit),
+                totalOrder,
+            });
+        } catch (error) {
+            reject({
+                status: 'ERR',
+                message: error.message,
+            });
+        }
+    });
+};
 const deleteOrder = (orderId) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -163,4 +186,5 @@ module.exports = {
     deleteOrder,
     getAllOrders,
     getOrderDetail,
+    getAllOrderPage
 } 

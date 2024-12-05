@@ -61,6 +61,21 @@ const getAllOrders = async (req, res) => {
         });
     }
 };
+const getAllOrderPage = async (req, res) => {
+    try {
+        const { limit, page } = req.query;
+        // Gọi hàm từ OrderService để xử lý logic
+        const response = await OrderService.getAllOrderPage(Number(limit) || 5, Number(page) || 1);
+        // Trả kết quả từ service về client
+        res.status(200).json(response);
+    } catch (error) {
+        // Xử lý lỗi
+        res.status(500).json({
+            status: 'ERR',
+            message: error.message,
+        });
+    }
+};
 const deleteOrder = async (req, res) => {
     try {
         const { orderId } = req.params;
@@ -135,5 +150,6 @@ module.exports = {
     deleteOrder,
     getAllOrders,
     getOrderDetail,
-    updateOrderStatus
+    updateOrderStatus,
+    getAllOrderPage
 };
