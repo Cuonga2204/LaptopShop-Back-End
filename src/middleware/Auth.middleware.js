@@ -3,18 +3,15 @@ const dotenv = require('dotenv');
 dotenv.config();
 const authUserMiddleware = (req, res, next) => {
     const token = req.headers.authorization.split(" ")[1];
-
-    const userId = req.body.userId || req.query.userId;
-    console.log(userId);
+    const userId = req.body.id || req.params.id;
 
     jwt.verify(token, process.env.ACCESS_TOKEN, function (err, user) {
         if (err) {
             return res.status(404).json({
                 status: 'ERR',
-                message: 'The authemtication'
+                message: 'The authentication'
             })
         }
-        console.log(user);
 
         const { payload } = user;
         if (payload.id === userId) {
@@ -29,26 +26,24 @@ const authUserMiddleware = (req, res, next) => {
     });
 }
 
-const authMiddleware = (req, res, next) => {
-    // console.log('checkToken', req.headers.token.split(' ')[1]);
+const authAdminMiddleware = (req, res, next) => {
     try {
         const token = req.headers.authorization.split(" ")[1];
         jwt.verify(token, 'access_token', function (err, user) {
-            // if (err instanceof jwt.JsonWebTokenError) {
-            //     return res.status(401).json({
-            //         status: 'ERR',
-            //         message: 'token expired'
-            //     })
-            // }
+            if (err instanceof jwt.JsonWebTokenError) {
+                return res.status(401).json({
+                    status: 'ERR',
+                    message: 'token expired'
+                })
+            }
             if (err) {
                 return res.status(404).json({
                     status: 'ERR',
-                    message: 'The authemtication'
+                    message: 'The authentication'
                 })
             }
-            // console.log('user', user)
             const { payload } = user;
-            if (payload.isAdmin) {
+            if (payload.role === 'admin') {
                 next();
 
             } else {
@@ -62,6 +57,6 @@ const authMiddleware = (req, res, next) => {
     }
 }
 module.exports = {
-    authMiddleware,
+    authAdminMiddleware,
     authUserMiddleware
 }

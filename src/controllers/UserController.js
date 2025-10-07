@@ -1,168 +1,162 @@
+const User = require("../models/UserModel");
+require("dotenv").config();
+const JwtService = require("../services/JwtService");
+const { successHandler, errorHandler } = require("../utils/ResponseHandle");
+const { ERRORS } = require("../errors/index");
+const bcrypt = require("bcrypt");
+const {
+  generalAccessToken,
+  generalRefreshToken,
+} = require("../services/JwtService");
 
-const UserService = require('../services/UserService')
-const JwtService = require('../services/JwtService')
 const createUser = async (req, res) => {
-    try {
-        const { email, password, confirmPassword } = req.body;
-        const imageUrl = req.file ? `/uploads/images/${req.file.filename}` : null;
-        console.log(req.body);
+  try {
+    const { email, password, name, phone } = req.body;
 
-        console.log(email);
-        console.log(password);
-        console.log(confirmPassword);
-        console.log(imageUrl);
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return errorHandler(res, ERRORS.USER_ALREADY_EXIST);
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const isCheckEmail = emailRegex.test(email);
+    const hashedPassword = bcrypt.hashSync(password, 10);
 
+    const newUser = await User.create({
+      email,
+      password: hashedPassword,
+      name,
+      phone,
+      image: req.file ? `/uploads/images/${req.file.filename}` : null,
+    });
 
-        if (!email || !password || !confirmPassword) {
-            return res.status(200).json({
-                status: 'ERR',
-                message: 'The input required'
-            })
-        }
-        else if (!isCheckEmail) {
-            return res.status(200).json({
-                status: 'ERR',
-                message: 'The input is email'
-            })
-        } else if (password !== confirmPassword) {
-            return res.status(200).json({
-                status: 'ERR',
-                message: 'The password in equal'
-            })
-        }
-        const response = await UserService.createUser(req.body, imageUrl)
-
-
-        return res.status(200).json(response)
-    } catch (error) {
-        return res.status(404).json({
-            message: error
-        })
-    }
-}
+    return successHandler(res, {
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+      },
+    });
+  } catch (error) {
+    return errorHandler(res, ERRORS.INTERNAL_SERVER_ERROR, error.message);
+  }
+};
 
 const loginUser = async (req, res) => {
-    try {
-        const { name, email, password, confirmPassword, phone } = req.body;
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const isCheckEmail = emailRegex.test(email)
-        if (!email || !password) {
-            return res.status(200).json({
-                status: 'ERR',
-                message: 'The input required'
-            })
-        }
-        else if (!isCheckEmail) {
-            return res.status(200).json({
-                status: 'ERR',
-                message: 'The input is email'
-            })
-        }
-        const response = await UserService.loginUser(req.body);
-
-        return res.status(200).json(response)
-    } catch (error) {
-        return res.status(404).json({
-            message: error
-        })
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return errorHandler(res, ERRORS.USER_NOT_FOUND);
     }
-}
 
+    const isMatch = bcrypt.compareSync(password, user.password);
+    if (!isMatch) {
+      return errorHandler(res, ERRORS.PASSWORD_NOT_MATCH);
+    }
+
+    const accessToken = await generalAccessToken({
+      id: user.id,
+      role: user.role,
+    });
+    const refreshToken = await generalRefreshToken({
+      id: user.id,
+      role: user.role,
+    });
+
+    return successHandler(res, {
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
+      accessToken,
+      refreshToken,
+    });
+  } catch (error) {
+    return errorHandler(res, ERRORS.INTERNAL_SERVER_ERROR, error.message);
+  }
+};
 const updateUser = async (req, res) => {
-    try {
-        const userId = req.params.id;
-        const data = req.body;
-        const imageUrl = req.file ? `/uploads/images/${req.file.filename}` : null;
-        console.log(imageUrl);
+  try {
+    const userId = req.params.id;
+    const { name, phone } = req.body;
+    const image = req.file ? `/uploads/images/${req.file.filename}` : null;
 
-        if (!userId) {
-            return res.status(200).json({
-                status: 'ERR',
-                message: 'userId is required'
-            })
-        }
-        const response = await UserService.updateUser(userId, data, imageUrl)
+    const user = await User.findById(userId);
+    if (!user) return errorHandler(res, ERRORS.USER_NOT_FOUND);
 
-        return res.status(200).json(response)
-    } catch (error) {
-        return res.status(404).json({
-            message: error
-        })
-    }
-}
+    user.name = name || user.name;
+    user.phone = phone || user.phone;
+    if (image) user.image = image;
+
+    await user.save();
+
+    return successHandler(res, user);
+  } catch (error) {
+    return errorHandler(res, ERRORS.INTERNAL_SERVER_ERROR, error.message);
+  }
+};
+
 const deleteUser = async (req, res) => {
-    try {
-        const userId = req.params.id;
-        if (!userId) {
-            return res.status(200).json({
-                status: 'ERR',
-                message: 'userId is required'
-            })
-        }
-        const response = await UserService.deleteUser(userId)
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId);
+    if (!user) return errorHandler(res, ERRORS.USER_NOT_FOUND);
 
-        return res.status(200).json(response)
-    } catch (error) {
-        return res.status(404).json({
-            message: error
-        })
-    }
-}
+    await User.findByIdAndDelete(userId);
+
+    return successHandler(res, user);
+  } catch (error) {
+    return errorHandler(res, ERRORS.INTERNAL_SERVER_ERROR, error.message);
+  }
+};
+
 const getAllUser = async (req, res) => {
-    try {
-        const { limit, page } = req.query;
-        const response = await UserService.getAllUser(Number(limit) || 5, Number(page) || 1)
-        return res.status(200).json(response)
-    } catch (error) {
-        return res.status(404).json({
-            message: error
-        })
-    }
-}
-const getDetailsUser = async (req, res) => {
-    try {
-        const userId = req.params.id;
-        if (!userId) {
-            return res.status(200).json({
-                status: 'ERR',
-                message: 'userId is required'
-            })
-        }
-        const response = await UserService.getDetailsUser(userId)
+  try {
+    const { limit = 10, page = 1 } = req.query;
+    const users = await User.find()
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
 
-        return res.status(200).json(response)
-    } catch (error) {
-        return res.status(404).json({
-            message: error
-        })
-    }
-}
+    const total = await User.countDocuments();
+    const data = {
+      total,
+      page: Number(page),
+      limit: Number(limit),
+      users,
+    };
+
+    return successHandler(res, data);
+  } catch (error) {
+    return errorHandler(res, ERRORS.INTERNAL_SERVER_ERROR, error.message);
+  }
+};
+
+const getDetailsUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId);
+    if (!user) return errorHandler(res, ERRORS.USER_NOT_FOUND);
+
+    return successHandler(res, user);
+  } catch (error) {
+    return errorHandler(res, ERRORS.INTERNAL_SERVER_ERROR, error.message);
+  }
+};
+
 const refreshToken = async (req, res) => {
-    try {
-        const token = req.headers.Authorization.split(" ")[1];
-        if (!token) {
-            return res.status(200).json({
-                status: 'ERR',
-                message: 'The token is required'
-            })
-        }
-        const response = await JwtService.refreshTokenService(token)
-        return res.status(200).json(response)
-    } catch (error) {
-        return res.status(404).json({
-            message: error
-        })
-    }
-}
+  try {
+    const token = req.headers.Authorization.split(" ")[1];
+    if (!token) errorHandler(res, ERRORS.TOKEN_REQUIRED);
+    const response = await JwtService.refreshTokenService(token);
+    return successHandler(res, response);
+  } catch (error) {
+    return errorHandler(res, ERRORS.INTERNAL_SERVER_ERROR, error.message);
+  }
+};
 module.exports = {
-    createUser,
-    loginUser,
-    updateUser,
-    deleteUser,
-    getAllUser,
-    getDetailsUser,
-    refreshToken
-}
+  createUser,
+  loginUser,
+  updateUser,
+  deleteUser,
+  getAllUser,
+  getDetailsUser,
+  refreshToken,
+};
