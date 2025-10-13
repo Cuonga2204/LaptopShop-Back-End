@@ -5,14 +5,12 @@ const {
   authUserMiddleware,
 } = require("../middleware/Auth.middleware");
 const { validateRequest } = require("../middleware/validateRequest.middleware");
-const uploadImage = require("../middleware/uploadImage.middleware");
 const { LoginSchema, SignupSchema } = require("../validations/auth");
 const router = express.Router();
 
 router.post(
   "/sign-up",
   validateRequest(SignupSchema, "body"),
-  uploadImage.single("avatar"),
   userController.createUser
 );
 router.post(
@@ -20,11 +18,7 @@ router.post(
   validateRequest(LoginSchema, "body"),
   userController.loginUser
 );
-router.put(
-  "/update-user/:id",
-  uploadImage.single("avatar"),
-  userController.updateUser
-);
+router.put("/update-user/:id", userController.updateUser);
 router.delete(
   "/delete-user/:id",
   authAdminMiddleware,

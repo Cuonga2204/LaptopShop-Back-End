@@ -69,6 +69,30 @@ const ERRORS = {
     message: "User already exists",
     code: 1104,
   },
+  TOKEN_IS_EXPIRED: {
+    status: 401,
+    success: false,
+    message: "token is expired",
+    code: 1105,
+  },
+  AUTHENTICATION_FAILED: {
+    status: 401,
+    success: false,
+    message: "Authentication failed",
+    code: 1106,
+  },
+  NOT_USER: {
+    status: 401,
+    success: false,
+    message: "Not authorized user",
+    code: 1107,
+  },
+  NOT_ADMIN: {
+    status: 401,
+    success: false,
+    message: "Not authorized as admin",
+    code: 1108,
+  },
 
   // Server errors
   INTERNAL_SERVER_ERROR: {
@@ -89,6 +113,28 @@ const ERRORS = {
     success: false,
     message: "Parameter value is invalid",
     code: 15002,
+  },
+
+  //Course
+  COURSE_NOT_FOUND: {
+    status: 400,
+    success: false,
+    message: "Course not found",
+    code: 2001,
+  },
+
+  //UserCourse
+  USER_ALREADY_ENROLL: {
+    status: 400,
+    success: false,
+    message: "User already enroll",
+    code: 3001,
+  },
+  USER_COURSE_NOT_FOUND: {
+    status: 400,
+    success: false,
+    message: "User Course not found",
+    code: 3002,
   },
 };
 

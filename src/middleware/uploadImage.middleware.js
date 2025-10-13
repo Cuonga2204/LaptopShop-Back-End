@@ -1,22 +1,37 @@
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-// Cấu hình đường dẫn và tên file
-const uploadDir = path.join(__dirname, '../uploads/images');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
-const storage = multer.diskStorage({
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
-    destination: (req, file, cb) => {
-        // cb(null, '/Users/Cuonga/Desktop/20232/project1/laptop-store-backend/src/uploads/images'); // Đường dẫn lưu ảnh
-        cb(null, uploadDir); // Đường dẫn lưu ảnh
-    },
-    filename: (req, file, cb) => {
-        cb(null, file.originalname);
-    }
+// Tạo thư mục nếu chưa có
+const uploadDir = path.join(__dirname, "../uploads/images/course");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Cấu hình Multer
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
+  },
 });
 
-const upload = multer({ storage: storage });
+const uploadImage = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    const filetypes = /jpeg|jpg|png|gif/;
+    const mimetype = filetypes.test(file.mimetype);
+    const extname = filetypes.test(
+      path.extname(file.originalname).toLowerCase()
+    );
 
-module.exports = upload;
+    if (mimetype && extname) return cb(null, true);
+    cb(new Error("Only images (jpeg, jpg, png, gif) are allowed!"));
+  },
+});
+
+module.exports = uploadImage;
