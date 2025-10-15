@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { USER_COURSE_STATUS } = require("../constants/userCourse.constants");
 
-const userCourseSchema = new mongoose.Schema(
+const UserCourseSchema = new mongoose.Schema(
   {
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
@@ -28,7 +28,17 @@ const userCourseSchema = new mongoose.Schema(
   }
 );
 
-userCourseSchema.index({ user_id: 1, course_id: 1 }, { unique: true });
+UserCourseSchema.index({ user_id: 1, course_id: 1 }, { unique: true });
 
-const UserCourse = mongoose.model("UserCourse", userCourseSchema);
+// 🧩 Chuyển _id -> id khi trả về JSON
+UserCourseSchema.set("toJSON", {
+  virtual: true,
+  versionKey: false,
+  transform: function (doc, ret) {
+    ret.id = ret._id;
+    delete ret._id;
+  },
+});
+
+const UserCourse = mongoose.model("UserCourse", UserCourseSchema);
 module.exports = UserCourse;

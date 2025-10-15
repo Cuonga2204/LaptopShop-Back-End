@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const { COURSE_CATEGORIES } = require("../constants/course.constants");
-const courseSchema = new mongoose.Schema(
+const CourseSchema = new mongoose.Schema(
   {
     category: {
       type: String,
@@ -24,5 +24,14 @@ const courseSchema = new mongoose.Schema(
   }
 );
 
-const Course = mongoose.model("Course", courseSchema);
+CourseSchema.set("toJSON", {
+  virtual: true,
+  versionKey: false,
+  transform: function (doc, ret) {
+    ret.id = ret._id;
+    delete ret._id;
+  },
+});
+
+const Course = mongoose.model("Course", CourseSchema);
 module.exports = Course;

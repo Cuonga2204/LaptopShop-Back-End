@@ -1,0 +1,20 @@
+const express = require("express");
+const router = express.Router();
+const lectureController = require("../controllers/LectureController");
+const uploadVideo = require("../middleware/uploadVideo.middleware");
+
+// === CRUD LECTURE ===
+router.post(
+  "/create",
+  uploadVideo.single("video"),
+  lectureController.createLecture
+);
+router.get("/section/:sectionId", lectureController.getLecturesBySection);
+router.put(
+  "/update/:id",
+  uploadVideo.single("video"),
+  lectureController.updateLecture
+);
+router.delete("/delete/:id", lectureController.deleteLecture);
+
+module.exports = router;

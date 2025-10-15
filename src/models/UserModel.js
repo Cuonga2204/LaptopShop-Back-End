@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const userSchema = new mongoose.Schema(
+const UserSchema = new mongoose.Schema(
   {
     name: { type: String },
     email: { type: String, required: true },
@@ -12,5 +12,14 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-const User = mongoose.model("User", userSchema);
+// 🧩 Chuyển _id -> id khi trả về JSON
+UserSchema.set("toJSON", {
+  virtual: true,
+  versionKey: false,
+  transform: function (doc, ret) {
+    ret.id = ret._id;
+    delete ret._id;
+  },
+});
+const User = mongoose.model("User", UserSchema);
 module.exports = User;
