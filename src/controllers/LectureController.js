@@ -18,6 +18,16 @@ const createLecture = async (req, res) => {
     return errorHandler(res, ERRORS.INTERNAL_SERVER_ERROR, err.message);
   }
 };
+const getLectureDetail = async (req, res) => {
+  try {
+    const lecture = await Lecture.findById(req.params.id);
+    if (!lecture) return errorHandler(res, ERRORS.LECTURE_NOT_FOUND);
+
+    return successHandler(res, lecture);
+  } catch (err) {
+    return errorHandler(res, ERRORS.INTERNAL_SERVER_ERROR, err.message);
+  }
+};
 
 const getLecturesBySection = async (req, res) => {
   try {
@@ -57,6 +67,7 @@ const deleteLecture = async (req, res) => {
 
 module.exports = {
   createLecture,
+  getLectureDetail,
   getLecturesBySection,
   updateLecture,
   deleteLecture,

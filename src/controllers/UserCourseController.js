@@ -50,13 +50,25 @@ const getCoursesByUser = async (req, res) => {
   try {
     const { user_id } = req.params;
 
-    const courses = await UserCourse.find({ user_id })
+    const userCourses = await UserCourse.find({ user_id })
       .populate("course_id")
       .select("-__v");
 
+    // 🔹 Chuyển dữ liệu thành dạng phẳng
+    const courses = userCourses.map((uc) => {
+      const course = uc.course_id?.toObject?.() || {};
+      return {
+        id: uc._id, // id của bản ghi UserCourse
+        status: uc.status,
+        userId: uc.user_id,
+        courseId: course._id, // ✅ ID khóa học thật
+        ...course, // gộp toàn bộ field của course_id
+      };
+    });
+
     return successHandler(res, courses);
-  } catch (error) {
-    return errorHandler(res, ERRORS.INTERNAL_SERVER_ERROR, error.message);
+  } catch {
+    return errorHandler(res, ERRORS.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -70,8 +82,8 @@ const getUsersByCourse = async (req, res) => {
       .select("-__v");
 
     return successHandler(res, users);
-  } catch (error) {
-    return errorHandler(res, ERRORS.INTERNAL_SERVER_ERROR, error.message);
+  } catch {
+    return errorHandler(res, ERRORS.INTERNAL_SERVER_ERROR);
   }
 };
 

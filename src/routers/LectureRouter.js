@@ -10,6 +10,7 @@ router.post(
   lectureController.createLecture
 );
 router.get("/section/:sectionId", lectureController.getLecturesBySection);
+router.get("/:id", lectureController.getLectureDetail);
 router.put(
   "/update/:id",
   uploadVideo.single("video"),
